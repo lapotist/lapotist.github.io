@@ -274,6 +274,184 @@ svg {
   z-index: 2;
 }
 
+.light-mode-warning {
+  width: min(calc(100% - 32px), 540px);
+  max-width: none;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #f5f6f0;
+}
+
+.light-mode-warning::backdrop {
+  background: rgb(6 8 5 / 82%);
+  backdrop-filter: blur(6px);
+}
+
+.light-mode-warning[open] {
+  animation: light-mode-warning-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes light-mode-warning-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+
+.light-mode-warning-panel {
+  overflow: hidden;
+  border: 1px solid #596050;
+  border-top: 5px solid #c9ff32;
+  border-radius: 6px;
+  background: #171a14;
+  box-shadow: 12px 12px 0 #ff674d;
+}
+
+.light-mode-warning-header {
+  display: flex;
+  min-height: 52px;
+  padding: 0 14px 0 18px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #3b4036;
+}
+
+.light-mode-warning-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #c9ff32;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.light-mode-warning-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #aeb4a7;
+  cursor: pointer;
+}
+
+.light-mode-warning-close:hover {
+  border-color: #596050;
+  color: #ffffff;
+}
+
+.light-mode-warning-body {
+  padding: 34px 34px 30px;
+}
+
+.light-mode-warning-sun {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  margin-bottom: 28px;
+  place-items: center;
+  background: #c9ff32;
+  box-shadow: 7px 7px 0 #315cff;
+  color: #171a14;
+}
+
+.light-mode-warning-sun svg {
+  width: 30px;
+  height: 30px;
+  stroke-width: 2;
+}
+
+.light-mode-warning-kicker {
+  margin: 0;
+  color: #ff765e;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.light-mode-warning h2 {
+  margin: 8px 0 0;
+  color: #ffffff;
+  font-size: 2.55rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.light-mode-warning-body > p:not(.light-mode-warning-kicker, .light-mode-warning-motion-note) {
+  max-width: 440px;
+  margin: 18px 0 0;
+  color: #bec4b7;
+  font-size: 0.94rem;
+}
+
+.light-mode-warning-motion-note {
+  display: none;
+  margin: 14px 0 0;
+  color: #c9ff32;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.7rem;
+}
+
+.light-mode-warning-actions {
+  display: grid;
+  padding: 18px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  border-top: 1px solid #3b4036;
+  background: #1d2119;
+}
+
+.light-mode-warning-cancel,
+.light-mode-warning-confirm {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.light-mode-warning-cancel {
+  border-color: #596050;
+  background: transparent;
+  color: #f5f6f0;
+}
+
+.light-mode-warning-cancel:hover {
+  border-color: #f5f6f0;
+}
+
+.light-mode-warning-confirm {
+  background: #f5f6f0;
+  color: #171a14;
+}
+
+.light-mode-warning-confirm:hover {
+  background: #c9ff32;
+}
+
+.flashbang {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flashbang.is-active {
+  pointer-events: auto;
+}
+
+html.flashbang-active {
+  overflow: hidden;
+}
+
 [data-tooltip]::after {
   position: absolute;
   top: calc(100% + 8px);
@@ -1624,6 +1802,22 @@ svg {
   .footer-inner {
     min-height: 82px;
   }
+
+  .light-mode-warning-panel {
+    box-shadow: 8px 8px 0 #ff674d;
+  }
+
+  .light-mode-warning-body {
+    padding: 28px 24px 24px;
+  }
+
+  .light-mode-warning h2 {
+    font-size: 2rem;
+  }
+
+  .light-mode-warning-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 390px) {
@@ -1775,5 +1969,9 @@ svg {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .light-mode-warning-motion-note {
+    display: block;
   }
 }

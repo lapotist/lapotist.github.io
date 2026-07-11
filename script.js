@@ -3,6 +3,9 @@ const GITHUB_API = `https://api.github.com/users/${GITHUB_USER}`;
 
 const themeToggle = document.querySelector("#theme-toggle");
 const themeColor = document.querySelector('meta[name="theme-color"]');
+const lightModeWarning = document.querySelector("#light-mode-warning");
+const confirmLightMode = document.querySelector("#confirm-light-mode");
+const flashbang = document.querySelector("#flashbang");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function getPreferredTheme() {
@@ -19,6 +22,7 @@ function applyTheme(theme) {
   const isDark = theme === "dark";
   document.documentElement.dataset.theme = theme;
   themeToggle?.setAttribute("aria-label", `Switch to ${isDark ? "light" : "dark"} theme`);
+  themeToggle?.setAttribute("data-tooltip", isDark ? "Light mode warning" : "Switch to dark");
   themeColor?.setAttribute("content", isDark ? "#151812" : "#f3f4ee");
 }
 
@@ -29,11 +33,9 @@ function commitTheme(theme) {
   applyTheme(theme);
 }
 
-themeToggle?.addEventListener("click", async () => {
-  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-
+async function switchTheme(theme) {
   if (!document.startViewTransition || reducedMotion.matches) {
-    commitTheme(nextTheme);
+    commitTheme(theme);
     return;
   }
 
@@ -41,7 +43,7 @@ themeToggle?.addEventListener("click", async () => {
   const x = bounds.left + bounds.width / 2;
   const y = bounds.top + bounds.height / 2;
   const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-  const transition = document.startViewTransition(() => commitTheme(nextTheme));
+  const transition = document.startViewTransition(() => commitTheme(theme));
 
   try {
     await transition.ready;
@@ -58,6 +60,95 @@ themeToggle?.addEventListener("click", async () => {
   } catch (error) {
     // The theme has already changed; unsupported transition details can safely fall back.
   }
+}
+
+let flashbangInProgress = false;
+
+async function switchToLightWithFlash() {
+  if (flashbangInProgress) {
+    return;
+  }
+
+  lightModeWarning?.close?.("confirmed");
+
+  if (!flashbang?.animate || reducedMotion.matches) {
+    commitTheme("light");
+    return;
+  }
+
+  flashbangInProgress = true;
+  document.documentElement.classList.add("flashbang-active");
+  flashbang.classList.add("is-active");
+
+  const animation = flashbang.animate(
+    [
+      { opacity: 0, offset: 0 },
+      { opacity: 1, offset: 0.08, easing: "ease-out" },
+      { opacity: 1, offset: 0.3 },
+      { opacity: 0, offset: 1 },
+    ],
+    {
+      duration: 1000,
+      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      fill: "forwards",
+    },
+  );
+  let themeCommitted = false;
+  const themeTimer = window.setTimeout(() => {
+    commitTheme("light");
+    themeCommitted = true;
+  }, 90);
+
+  try {
+    await animation.finished;
+  } catch (error) {
+    // A canceled visual effect should not leave the requested theme unapplied.
+  } finally {
+    window.clearTimeout(themeTimer);
+
+    if (!themeCommitted) {
+      commitTheme("light");
+    }
+
+    animation.cancel();
+    flashbang.classList.remove("is-active");
+    document.documentElement.classList.remove("flashbang-active");
+    flashbangInProgress = false;
+  }
+}
+
+themeToggle?.addEventListener("click", () => {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+
+  if (nextTheme === "light") {
+    if (lightModeWarning?.showModal) {
+      if (!lightModeWarning.open) {
+        lightModeWarning.showModal();
+      }
+    } else if (window.confirm("Warning: light mode begins with a bright full-screen flash. Continue?")) {
+      void switchToLightWithFlash();
+    }
+
+    return;
+  }
+
+  void switchTheme(nextTheme);
+});
+
+confirmLightMode?.addEventListener("click", () => {
+  void switchToLightWithFlash();
+});
+
+lightModeWarning?.addEventListener("click", (event) => {
+  if (event.target === lightModeWarning) {
+    lightModeWarning.close("cancel");
+  }
+});
+
+lightModeWarning?.addEventListener("close", () => {
+  window.setTimeout(() => {
+    themeToggle?.focus({ preventScroll: true });
+  }, 0);
 });
 
 document.querySelectorAll("[data-current-year]").forEach((element) => {
