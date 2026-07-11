@@ -1,9 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-sound="on">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f3f4ee">
+    <meta name="theme-color" content="#151812">
+    <script>
+      try {
+        const savedTheme = localStorage.getItem("lapotist-theme");
+        const savedSound = localStorage.getItem("lapotist-sound");
+
+        if (savedTheme === "light") {
+          document.documentElement.dataset.theme = "light";
+          document.querySelector('meta[name="theme-color"]').content = "#f3f4ee";
+        }
+
+        if (savedSound === "off") {
+          document.documentElement.dataset.sound = "off";
+        }
+      } catch (error) {
+        // Dark theme and sound-on defaults are already present in the markup.
+      }
+    </script>
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta
       name="description"
@@ -28,7 +45,7 @@
     <link rel="canonical" href="https://lapotist.me/">
     <link rel="preconnect" href="https://avatars.githubusercontent.com">
     <link rel="preconnect" href="https://api.github.com">
-    <link rel="stylesheet" href="styles.css?v=b1577ba">
+    <link rel="stylesheet" href="styles.css?v=20260712.1">
     <script
       src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"
       crossorigin="anonymous"
@@ -36,7 +53,7 @@
       referrerpolicy="no-referrer"
       defer
     ></script>
-    <script src="script.js?v=b1577ba" defer></script>
+    <script src="script.js?v=20260712.1" defer></script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -49,8 +66,13 @@
         "sameAs": [
           "https://github.com/lapotist",
           "https://www.youtube.com/@lapotist",
+          "https://www.youtube.com/@lapotist0",
+          "https://www.twitch.tv/lapotist",
           "https://www.instagram.com/lapotist/",
-          "https://www.threads.net/@lapotist"
+          "https://www.threads.net/@lapotist",
+          "https://steamcommunity.com/id/lapotist",
+          "https://lapotist-studio.itch.io/",
+          "https://hypixel.net/members/lapotist.6111564/"
         ]
       }
     </script>
@@ -69,6 +91,7 @@
           <a href="#work">Work</a>
           <a href="#about">About</a>
           <a href="#activity">Activity</a>
+          <a href="#socials">Links</a>
         </div>
 
         <div class="nav-actions">
@@ -84,10 +107,21 @@
           </a>
           <button
             class="icon-button"
+            id="sound-toggle"
+            type="button"
+            aria-label="Sound effects"
+            aria-pressed="true"
+            data-tooltip="Mute sound"
+          >
+            <i class="sound-icon sound-icon-on" data-lucide="volume-2" aria-hidden="true"></i>
+            <i class="sound-icon sound-icon-off" data-lucide="volume-x" aria-hidden="true"></i>
+          </button>
+          <button
+            class="icon-button"
             id="theme-toggle"
             type="button"
-            aria-label="Switch to dark theme"
-            data-tooltip="Change theme"
+            aria-label="Switch to light theme"
+            data-tooltip="Light mode, really?"
           >
             <i class="theme-icon theme-icon-sun" data-lucide="sun" aria-hidden="true"></i>
             <i class="theme-icon theme-icon-moon" data-lucide="moon" aria-hidden="true"></i>
@@ -353,7 +387,7 @@
         </div>
       </section>
 
-      <section class="contact-section" aria-labelledby="contact-title">
+      <section class="contact-section" id="socials" aria-labelledby="contact-title">
         <div class="contact-inner shell reveal">
           <p class="section-kicker">04 / Find me online</p>
           <h2 id="contact-title">The next idea starts with a message.</h2>
@@ -374,6 +408,20 @@
               rel="noreferrer noopener"
             >
               <span><i data-lucide="youtube" aria-hidden="true"></i> YouTube</span>
+              <small>@lapotist / main</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://www.youtube.com/@lapotist0"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="archive" aria-hidden="true"></i> YouTube archive</span>
+              <small>@lapotist0</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a href="https://www.twitch.tv/lapotist" target="_blank" rel="noreferrer noopener">
+              <span><i data-lucide="twitch" aria-hidden="true"></i> Twitch</span>
               <small>@lapotist</small>
               <i data-lucide="arrow-up-right" aria-hidden="true"></i>
             </a>
@@ -392,6 +440,33 @@
               rel="noreferrer noopener"
             >
               <span><i data-lucide="at-sign" aria-hidden="true"></i> Threads</span>
+              <small>@lapotist</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://steamcommunity.com/id/lapotist"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="gamepad-2" aria-hidden="true"></i> Steam</span>
+              <small>lapotist</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://lapotist-studio.itch.io/"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="joystick" aria-hidden="true"></i> itch.io</span>
+              <small>Lapotist studio</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://hypixel.net/members/lapotist.6111564/"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="blocks" aria-hidden="true"></i> Hypixel</span>
               <small>@lapotist</small>
               <i data-lucide="arrow-up-right" aria-hidden="true"></i>
             </a>

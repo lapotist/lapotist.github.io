@@ -240,6 +240,31 @@ svg {
   transition: opacity 180ms ease, transform 240ms ease;
 }
 
+.sound-icon {
+  position: absolute;
+  transition: opacity 180ms ease, transform 240ms ease;
+}
+
+.sound-icon-on {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.sound-icon-off {
+  opacity: 0;
+  transform: scale(0.65);
+}
+
+:root[data-sound="off"] .sound-icon-on {
+  opacity: 0;
+  transform: scale(0.65);
+}
+
+:root[data-sound="off"] .sound-icon-off {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .theme-icon-sun {
   opacity: 0;
   transform: rotate(-70deg) scale(0.65);
@@ -1339,7 +1364,7 @@ html.flashbang-active {
 
 .contact-links > a::before {
   color: var(--blue-text);
-  content: "0" counter(contact-link);
+  content: counter(contact-link, decimal-leading-zero);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.68rem;
   font-weight: 900;

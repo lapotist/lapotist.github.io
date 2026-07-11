@@ -2,20 +2,37 @@ const GITHUB_USER = "lapotist";
 const GITHUB_API = `https://api.github.com/users/${GITHUB_USER}`;
 
 const themeToggle = document.querySelector("#theme-toggle");
+const soundToggle = document.querySelector("#sound-toggle");
 const themeColor = document.querySelector('meta[name="theme-color"]');
 const lightModeWarning = document.querySelector("#light-mode-warning");
 const confirmLightMode = document.querySelector("#confirm-light-mode");
 const flashbang = document.querySelector("#flashbang");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
+function readStoredPreference(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeStoredPreference(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    // The in-memory preference still applies when storage is unavailable.
+  }
+}
+
 function getPreferredTheme() {
-  const savedTheme = localStorage.getItem("lapotist-theme");
+  const savedTheme = readStoredPreference("lapotist-theme");
 
   if (savedTheme === "light" || savedTheme === "dark") {
     return savedTheme;
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 function applyTheme(theme) {
@@ -29,9 +46,210 @@ function applyTheme(theme) {
 applyTheme(getPreferredTheme());
 
 function commitTheme(theme) {
-  localStorage.setItem("lapotist-theme", theme);
+  writeStoredPreference("lapotist-theme", theme);
   applyTheme(theme);
 }
+
+let soundEnabled = readStoredPreference("lapotist-sound") !== "off";
+let soundGeneration = 0;
+let audioContext;
+let audioMaster;
+const activeAudioSources = new Set();
+
+function applySoundPreference(enabled) {
+  soundGeneration += 1;
+  soundEnabled = enabled;
+  document.documentElement.dataset.sound = enabled ? "on" : "off";
+  soundToggle?.setAttribute("aria-pressed", String(enabled));
+  soundToggle?.setAttribute("data-tooltip", enabled ? "Mute sound" : "Enable sound");
+
+  if (audioContext && audioMaster && audioContext.state !== "closed") {
+    const now = audioContext.currentTime;
+    audioMaster.gain.cancelScheduledValues(now);
+    audioMaster.gain.setValueAtTime(enabled ? 0.42 : 0, now);
+  }
+
+  if (!enabled) {
+    activeAudioSources.forEach((source) => {
+      try {
+        source.stop();
+      } catch (error) {
+        // The source may already have ended between the preference change and cleanup.
+      }
+    });
+    activeAudioSources.clear();
+  }
+}
+
+function getAudioOutput() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    return null;
+  }
+
+  if (audioContext?.state === "closed") {
+    audioContext = undefined;
+    audioMaster = undefined;
+  }
+
+  if (!audioContext) {
+    audioContext = new AudioContextClass();
+    const compressor = audioContext.createDynamicsCompressor();
+    audioMaster = audioContext.createGain();
+    audioMaster.gain.value = 0.42;
+    compressor.threshold.value = -18;
+    compressor.knee.value = 12;
+    compressor.ratio.value = 6;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.25;
+    audioMaster.connect(compressor).connect(audioContext.destination);
+  }
+
+  return { context: audioContext, output: audioMaster };
+}
+
+function startAudioSource(source, startTime, stopTime) {
+  activeAudioSources.add(source);
+  source.addEventListener("ended", () => activeAudioSources.delete(source), { once: true });
+  source.start(startTime);
+  source.stop(stopTime);
+}
+
+function playSound(effect) {
+  if (!soundEnabled) {
+    return;
+  }
+
+  const audio = getAudioOutput();
+  const requestedGeneration = soundGeneration;
+
+  if (!audio) {
+    return;
+  }
+
+  const startEffect = () => {
+    if (
+      soundEnabled &&
+      requestedGeneration === soundGeneration &&
+      audio.context.state === "running"
+    ) {
+      effect(audio.context, audio.output);
+    }
+  };
+
+  if (audio.context.state !== "running" && audio.context.state !== "closed") {
+    audio.context.resume().then(startEffect).catch(() => {});
+  } else {
+    startEffect();
+  }
+}
+
+function playInterfaceSound(direction = "up") {
+  playSound((context, output) => {
+    const now = context.currentTime;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const startFrequency = direction === "up" ? 320 : 480;
+    const endFrequency = direction === "up" ? 520 : 260;
+
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(startFrequency, now);
+    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + 0.09);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.055, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    oscillator.connect(gain).connect(output);
+    startAudioSource(oscillator, now, now + 0.13);
+  });
+}
+
+function playLightModeMock() {
+  playSound((context, output) => {
+    const now = context.currentTime;
+
+    [
+      { delay: 0, frequency: 430 },
+      { delay: 0.1, frequency: 300 },
+    ].forEach(({ delay, frequency }) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const start = now + delay;
+
+      oscillator.type = "square";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.82, start + 0.12);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.035, start + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.14);
+      oscillator.connect(gain).connect(output);
+      startAudioSource(oscillator, start, start + 0.15);
+    });
+  });
+}
+
+function playFlashbangSound() {
+  playSound((context, output) => {
+    const now = context.currentTime + 0.01;
+    const noiseLength = Math.floor(context.sampleRate * 0.42);
+    const noiseBuffer = context.createBuffer(1, noiseLength, context.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+
+    for (let index = 0; index < noiseLength; index += 1) {
+      noiseData[index] = Math.random() * 2 - 1;
+    }
+
+    const noise = context.createBufferSource();
+    const noiseFilter = context.createBiquadFilter();
+    const noiseGain = context.createGain();
+    noise.buffer = noiseBuffer;
+    noiseFilter.type = "lowpass";
+    noiseFilter.frequency.setValueAtTime(5600, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(900, now + 0.38);
+    noiseGain.gain.setValueAtTime(0.32, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+    noise.connect(noiseFilter).connect(noiseGain).connect(output);
+    startAudioSource(noise, now, now + 0.43);
+
+    const thump = context.createOscillator();
+    const thumpGain = context.createGain();
+    thump.type = "sine";
+    thump.frequency.setValueAtTime(125, now);
+    thump.frequency.exponentialRampToValueAtTime(48, now + 0.32);
+    thumpGain.gain.setValueAtTime(0.24, now);
+    thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+    thump.connect(thumpGain).connect(output);
+    startAudioSource(thump, now, now + 0.35);
+
+    [3150, 3470].forEach((frequency, index) => {
+      const ring = context.createOscillator();
+      const ringGain = context.createGain();
+      const ringStart = now + 0.11 + index * 0.018;
+      ring.type = "sine";
+      ring.frequency.setValueAtTime(frequency, ringStart);
+      ring.frequency.exponentialRampToValueAtTime(frequency * 0.94, ringStart + 4.9);
+      ringGain.gain.setValueAtTime(0.0001, ringStart);
+      ringGain.gain.exponentialRampToValueAtTime(index === 0 ? 0.04 : 0.018, ringStart + 0.08);
+      ringGain.gain.setValueAtTime(index === 0 ? 0.032 : 0.014, ringStart + 0.8);
+      ringGain.gain.exponentialRampToValueAtTime(0.0001, ringStart + 5);
+      ring.connect(ringGain).connect(output);
+      startAudioSource(ring, ringStart, ringStart + 5.05);
+    });
+  });
+}
+
+applySoundPreference(soundEnabled);
+
+soundToggle?.addEventListener("click", () => {
+  const nextEnabled = !soundEnabled;
+
+  applySoundPreference(nextEnabled);
+  writeStoredPreference("lapotist-sound", nextEnabled ? "on" : "off");
+
+  if (nextEnabled) {
+    playInterfaceSound("up");
+  }
+});
 
 async function switchTheme(theme) {
   if (!document.startViewTransition || reducedMotion.matches) {
@@ -73,9 +291,11 @@ async function switchToLightWithFlash() {
 
   if (!flashbang?.animate || reducedMotion.matches) {
     commitTheme("light");
+    playInterfaceSound("up");
     return;
   }
 
+  playFlashbangSound();
   flashbangInProgress = true;
   document.documentElement.classList.add("flashbang-active");
   flashbang.classList.add("is-active");
@@ -153,6 +373,8 @@ themeToggle?.addEventListener("click", () => {
   const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
 
   if (nextTheme === "light") {
+    playLightModeMock();
+
     if (lightModeWarning?.showModal) {
       if (!lightModeWarning.open) {
         lightModeWarning.showModal();
@@ -164,6 +386,7 @@ themeToggle?.addEventListener("click", () => {
     return;
   }
 
+  playInterfaceSound("down");
   void switchTheme(nextTheme);
 });
 
@@ -178,6 +401,10 @@ lightModeWarning?.addEventListener("click", (event) => {
 });
 
 lightModeWarning?.addEventListener("close", () => {
+  if (lightModeWarning.returnValue !== "confirmed") {
+    playInterfaceSound("down");
+  }
+
   window.setTimeout(() => {
     themeToggle?.focus({ preventScroll: true });
   }, 0);
