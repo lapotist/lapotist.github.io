@@ -440,8 +440,10 @@ svg {
   inset: 0;
   z-index: 2000;
   background: #ffffff;
+  backdrop-filter: none;
   opacity: 0;
   pointer-events: none;
+  will-change: opacity, backdrop-filter;
 }
 
 .flashbang.is-active {

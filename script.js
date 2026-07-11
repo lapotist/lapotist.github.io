@@ -22,7 +22,7 @@ function applyTheme(theme) {
   const isDark = theme === "dark";
   document.documentElement.dataset.theme = theme;
   themeToggle?.setAttribute("aria-label", `Switch to ${isDark ? "light" : "dark"} theme`);
-  themeToggle?.setAttribute("data-tooltip", isDark ? "Light mode warning" : "Switch to dark");
+  themeToggle?.setAttribute("data-tooltip", isDark ? "Light mode, really?" : "Switch to dark");
   themeColor?.setAttribute("content", isDark ? "#151812" : "#f3f4ee");
 }
 
@@ -82,14 +82,46 @@ async function switchToLightWithFlash() {
 
   const animation = flashbang.animate(
     [
-      { opacity: 0, offset: 0 },
-      { opacity: 1, offset: 0.08, easing: "ease-out" },
-      { opacity: 1, offset: 0.3 },
-      { opacity: 0, offset: 1 },
+      {
+        opacity: 0,
+        backdropFilter: "blur(0) brightness(1) saturate(1)",
+        offset: 0,
+      },
+      {
+        opacity: 1,
+        backdropFilter: "blur(18px) brightness(3) saturate(0.1)",
+        offset: 0.02,
+        easing: "ease-out",
+      },
+      {
+        opacity: 1,
+        backdropFilter: "blur(18px) brightness(3) saturate(0.1)",
+        offset: 0.24,
+      },
+      {
+        opacity: 0.93,
+        backdropFilter: "blur(14px) brightness(2.5) saturate(0.2)",
+        offset: 0.42,
+      },
+      {
+        opacity: 0.68,
+        backdropFilter: "blur(9px) brightness(2) saturate(0.4)",
+        offset: 0.62,
+      },
+      {
+        opacity: 0.35,
+        backdropFilter: "blur(4px) brightness(1.45) saturate(0.7)",
+        offset: 0.82,
+      },
+      {
+        opacity: 0,
+        backdropFilter: "blur(0) brightness(1) saturate(1)",
+        offset: 1,
+      },
     ],
     {
-      duration: 1000,
-      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+      duration: 5200,
+      easing: "linear",
       fill: "forwards",
     },
   );
@@ -125,7 +157,7 @@ themeToggle?.addEventListener("click", () => {
       if (!lightModeWarning.open) {
         lightModeWarning.showModal();
       }
-    } else if (window.confirm("Warning: light mode begins with a bright full-screen flash. Continue?")) {
+    } else if (window.confirm("HAHA. Light mode? Seriously?")) {
       void switchToLightWithFlash();
     }
 
