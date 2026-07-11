@@ -1,35 +1,432 @@
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title>Pk Sim V3 Calculators</title>
-    <script src="calculators.js"></script>
-</head>
-<body>
-    <!-- Level to XP Calculator -->
-    <label for="inputLevel">Enter a level:</label>
-    <input type="number" id="inputLevel">
-    <button onclick="calculateXP()">Calculate XP</button>
-    <p id="xpOutput"></p>
-
-    <!-- XP to Level Calculator -->
-    <label for="inputXP">Enter XP:</label>
-    <input type="number" id="inputXP">
-    <button onclick="calculateLevel()">Calculate Level</button>
-    <p id="levelOutput"></p>
-
-    <script>
-        function calculateXP() {
-            var inputLevel = document.getElementById("inputLevel").value;
-            var xpResult = levelXp(inputLevel); // Assuming levelXp is a function in calculators.js
-            document.getElementById("xpOutput").innerHTML = "XP Required: " + xpResult;
-        }
-
-        function calculateLevel() {
-            var inputXP = document.getElementById("inputXP").value;
-            var levelResult = xpToLvl(inputXP); // Assuming xpToLvl is a function in calculators.js
-            document.getElementById("levelOutput").innerHTML = "Level Achieved: " + levelResult;
-        }
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f3f4ee">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta
+      name="description"
+      content="Lapotist, also known as 小拉, explores cybersecurity, reverse engineering, games, and the edges of what Minecraft can do."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lapotist.me/">
+    <meta property="og:title" content="Lapotist - developer and builder">
+    <meta
+      property="og:description"
+      content="Cybersecurity, reverse engineering, games, and the edges of what Minecraft can do."
+    >
+    <meta property="og:image" content="https://avatars.githubusercontent.com/u/96067207?v=4">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Lapotist - developer and builder">
+    <meta
+      name="twitter:description"
+      content="Cybersecurity, reverse engineering, games, and the edges of what Minecraft can do."
+    >
+    <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/96067207?v=4">
+    <title>Lapotist - developer and builder</title>
+    <link rel="canonical" href="https://lapotist.me/">
+    <link rel="preconnect" href="https://avatars.githubusercontent.com">
+    <link rel="preconnect" href="https://api.github.com">
+    <link rel="stylesheet" href="styles.css">
+    <script
+      src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"
+      crossorigin="anonymous"
+      integrity="sha384-uTYyvsSSUZeaPhb5RbKlQa0zY/WpX/QHfvg2mczXyBQOpkWPEDy9lczyp+w7SKXu"
+      referrerpolicy="no-referrer"
+      defer
+    ></script>
+    <script src="script.js" defer></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "小拉",
+        "alternateName": "lapotist",
+        "url": "https://lapotist.me/",
+        "image": "https://avatars.githubusercontent.com/u/96067207?v=4",
+        "email": "mailto:lapotist@gmail.com",
+        "sameAs": [
+          "https://github.com/lapotist",
+          "https://www.youtube.com/@lapotist",
+          "https://www.instagram.com/lapotist/",
+          "https://www.threads.net/@lapotist"
+        ]
+      }
     </script>
-</body>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+      <nav class="site-nav shell" aria-label="Primary navigation">
+        <a class="wordmark" href="#top" aria-label="Lapotist, back to top">
+          <span class="wordmark-mark" aria-hidden="true">L/</span>
+          <span>Lapotist</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="#work">Work</a>
+          <a href="#about">About</a>
+          <a href="#activity">Activity</a>
+        </div>
+
+        <div class="nav-actions">
+          <a
+            class="icon-button"
+            href="https://github.com/lapotist"
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="Open Lapotist on GitHub"
+            data-tooltip="GitHub"
+          >
+            <i data-lucide="github" aria-hidden="true"></i>
+          </a>
+          <button
+            class="icon-button"
+            id="theme-toggle"
+            type="button"
+            aria-label="Switch to dark theme"
+            data-tooltip="Change theme"
+          >
+            <i class="theme-icon theme-icon-sun" data-lucide="sun" aria-hidden="true"></i>
+            <i class="theme-icon theme-icon-moon" data-lucide="moon" aria-hidden="true"></i>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-art">
+          <div class="hero-color-block" aria-hidden="true"></div>
+          <img
+            class="hero-avatar"
+            src="https://avatars.githubusercontent.com/u/96067207?v=4"
+            alt="Illustrated avatar used by Lapotist on GitHub"
+            width="460"
+            height="460"
+            referrerpolicy="no-referrer"
+          >
+          <span class="hero-index" aria-hidden="true">00 / WHOAMI</span>
+        </div>
+
+        <div class="hero-content shell">
+          <p class="eyebrow reveal">Lapotist / 小拉 <span aria-hidden="true">//</span> online</p>
+          <h1 class="reveal" id="hero-title">Lapotist</h1>
+          <p class="hero-statement reveal">I build code that feels playable.</p>
+          <p class="hero-copy reveal">
+            Cybersecurity, reverse engineering, games, and the edges of what Minecraft can do.
+            Mostly experiments. Built to run.
+          </p>
+          <div class="hero-actions reveal">
+            <a class="button button-primary" href="#work">
+              See selected work
+              <i data-lucide="arrow-down-right" aria-hidden="true"></i>
+            </a>
+            <a
+              class="button button-secondary"
+              href="mailto:lapotist@gmail.com"
+              aria-label="Email Lapotist at lapotist@gmail.com"
+            >
+              <i data-lucide="mail" aria-hidden="true"></i>
+              Say hello
+            </a>
+          </div>
+
+          <div class="hero-status reveal" aria-live="polite">
+            <span class="status-light" aria-hidden="true"></span>
+            <span id="data-status">Syncing public GitHub data</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="signal-strip" aria-label="GitHub profile summary">
+        <div class="signal-grid shell">
+          <div class="signal-item">
+            <span class="signal-value" id="repo-count">7</span>
+            <span class="signal-label">Public repositories</span>
+          </div>
+          <div class="signal-item">
+            <span class="signal-value" id="language-count">4+</span>
+            <span class="signal-label">Languages in public work</span>
+          </div>
+          <div class="signal-item">
+            <span class="signal-value" id="github-since">2021</span>
+            <span class="signal-label">On GitHub since</span>
+          </div>
+          <a
+            class="signal-link"
+            href="https://github.com/lapotist?tab=repositories"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            All repositories
+            <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+          </a>
+        </div>
+      </section>
+
+      <section class="work-section" id="work" aria-labelledby="work-title">
+        <div class="shell">
+          <div class="section-heading section-heading-light reveal">
+            <div>
+              <p class="section-kicker">01 / Selected work</p>
+              <h2 id="work-title">Things built to be used.</h2>
+            </div>
+            <p>
+              Public experiments across game systems, utilities, automation, and problem solving.
+            </p>
+          </div>
+
+          <div class="project-grid">
+            <article class="project-card project-featured reveal" data-repo="Lapex-Denizen-Scripts">
+              <div class="project-number" aria-hidden="true">01</div>
+              <div class="project-body">
+                <div class="project-meta">
+                  <span class="tag">DenizenScript</span>
+                  <span class="tag tag-muted">Minecraft</span>
+                </div>
+                <h3>Lapex</h3>
+                <p>
+                  A recreation of Apex Legends inside Minecraft, pairing gameplay scripts with a custom resource pack.
+                </p>
+                <div class="project-links">
+                  <a
+                    href="https://github.com/lapotist/Lapex-Denizen-Scripts"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    View scripts
+                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                  </a>
+                  <a
+                    href="https://github.com/lapotist/Lapex-Resourse-Pack"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    View resource pack
+                    <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="project-mark" aria-hidden="true">
+                <span>LPX</span>
+                <small>GAME / SYSTEM</small>
+              </div>
+              <p class="project-updated" data-updated>Public repository</p>
+            </article>
+
+            <article class="project-card reveal" data-repo="Survival-Extension-1.19.4">
+              <div class="project-number" aria-hidden="true">02</div>
+              <div class="project-body">
+                <div class="project-meta">
+                  <span class="tag tag-coral">Java</span>
+                  <span class="tag tag-muted">Modding</span>
+                </div>
+                <h3>Survival Extension</h3>
+                <p>A Java mod that adds more to Minecraft survival.</p>
+                <a
+                  class="project-primary-link"
+                  href="https://github.com/lapotist/Survival-Extension-1.19.4"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Open repository
+                  <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                </a>
+              </div>
+              <p class="project-updated" data-updated>Public repository</p>
+            </article>
+
+            <article class="project-card reveal" data-repo="BlueLegionaBot">
+              <div class="project-number" aria-hidden="true">03</div>
+              <div class="project-body">
+                <div class="project-meta">
+                  <span class="tag tag-blue">JavaScript</span>
+                  <span class="tag tag-muted">Automation</span>
+                </div>
+                <h3>BlueLegionaBot</h3>
+                <p>A purpose-built Discord bot for the Blue Legion community.</p>
+                <a
+                  class="project-primary-link"
+                  href="https://github.com/lapotist/BlueLegionaBot"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Open repository
+                  <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                </a>
+              </div>
+              <p class="project-updated" data-updated>Public repository</p>
+            </article>
+
+            <article class="project-card project-wide reveal" data-repo="neetcode-submissions-c7l6lrgf">
+              <div class="project-number" aria-hidden="true">04</div>
+              <div class="project-body">
+                <div class="project-meta">
+                  <span class="tag tag-coral">C++</span>
+                  <span class="tag tag-muted">Algorithms</span>
+                </div>
+                <h3>NeetCode practice</h3>
+                <p>A growing public trail of data structures, algorithms, and solved problems.</p>
+                <a
+                  class="project-primary-link"
+                  href="https://github.com/lapotist/neetcode-submissions-c7l6lrgf"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  Browse submissions
+                  <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+                </a>
+              </div>
+              <p class="project-updated" data-updated>Public repository</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="about-section" id="about" aria-labelledby="about-title">
+        <div class="about-grid shell">
+          <div class="about-copy reveal">
+            <p class="section-kicker">02 / Whoami</p>
+            <h2 id="about-title">Curious by default.<br>Hands-on by choice.</h2>
+            <p>
+              I'm Lapotist, also known as 小拉. I like cybersecurity, reverse engineering, and games.
+              My public work moves between Minecraft, the web, community tools, and algorithm practice.
+            </p>
+            <a
+              class="text-link"
+              href="https://github.com/lapotist"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Follow the work on GitHub
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          <div class="terminal reveal" aria-label="Lapotist profile summary">
+            <div class="terminal-header">
+              <span><i data-lucide="terminal" aria-hidden="true"></i> public/profile</span>
+              <span>bash</span>
+            </div>
+            <dl class="terminal-output">
+              <div>
+                <dt><span aria-hidden="true">$</span> whoami</dt>
+                <dd>lapotist / 小拉</dd>
+              </div>
+              <div>
+                <dt><span aria-hidden="true">$</span> interests</dt>
+                <dd>cybersecurity / reverse engineering / games</dd>
+              </div>
+              <div>
+                <dt><span aria-hidden="true">$</span> setup</dt>
+                <dd>Windows / Chrome / VS Code</dd>
+              </div>
+              <div>
+                <dt><span aria-hidden="true">$</span> currently</dt>
+                <dd>Minecraft / web tools / C++</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section class="activity-section" id="activity" aria-labelledby="activity-title">
+        <div class="activity-grid shell">
+          <div class="activity-heading reveal">
+            <p class="section-kicker">03 / Public activity</p>
+            <h2 id="activity-title">Still building.</h2>
+            <p>Recent public activity, loaded directly from GitHub.</p>
+            <a
+              class="button button-ink"
+              href="https://github.com/lapotist?tab=overview"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <i data-lucide="github" aria-hidden="true"></i>
+              Full activity
+            </a>
+          </div>
+
+          <ol class="activity-list reveal" id="activity-list">
+            <li>
+              <span class="activity-icon"><i data-lucide="git-commit-horizontal" aria-hidden="true"></i></span>
+              <div>
+                <strong>Updated lapotist.github.io</strong>
+                <a href="https://github.com/lapotist/lapotist.github.io">lapotist/lapotist.github.io</a>
+              </div>
+              <time>Recent</time>
+            </li>
+            <li>
+              <span class="activity-icon"><i data-lucide="git-pull-request-arrow" aria-hidden="true"></i></span>
+              <div>
+                <strong>Practiced algorithms in C++</strong>
+                <a href="https://github.com/lapotist/neetcode-submissions-c7l6lrgf">lapotist/neetcode-submissions</a>
+              </div>
+              <time>Recent</time>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="contact-section" aria-labelledby="contact-title">
+        <div class="contact-inner shell reveal">
+          <p class="section-kicker">04 / Find me online</p>
+          <h2 id="contact-title">The next idea starts with a message.</h2>
+          <div class="contact-links">
+            <a href="mailto:lapotist@gmail.com">
+              <span><i data-lucide="mail" aria-hidden="true"></i> Email</span>
+              <small>lapotist@gmail.com</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a href="https://github.com/lapotist" target="_blank" rel="noreferrer noopener">
+              <span><i data-lucide="github" aria-hidden="true"></i> GitHub</span>
+              <small>@lapotist</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://www.youtube.com/@lapotist"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="youtube" aria-hidden="true"></i> YouTube</span>
+              <small>@lapotist</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://www.instagram.com/lapotist/"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="instagram" aria-hidden="true"></i> Instagram</span>
+              <small>@lapotist</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+            <a
+              href="https://www.threads.net/@lapotist"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span><i data-lucide="at-sign" aria-hidden="true"></i> Threads</span>
+              <small>@lapotist</small>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner shell">
+        <p>Lapotist <span aria-hidden="true">/</span> <span data-current-year>2026</span></p>
+        <p>Built in public. Data from the GitHub API.</p>
+        <a href="#top" aria-label="Back to top">
+          Back to top
+          <i data-lucide="arrow-up" aria-hidden="true"></i>
+        </a>
+      </div>
+    </footer>
+  </body>
 </html>
