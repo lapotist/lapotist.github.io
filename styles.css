@@ -1417,6 +1417,162 @@ html.flashbang-active {
   transform: translate(3px, -3px);
 }
 
+.games-section {
+  padding: 116px 0 128px;
+  border-top: 1px solid #343a2f;
+  background: #10130e;
+  color: #f5f6f0;
+}
+
+.games-heading {
+  margin-bottom: 42px;
+}
+
+.games-heading .section-kicker {
+  color: var(--lime);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.game-card {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 16 / 10;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #3b4036;
+  border-radius: 6px;
+  background: #20241c;
+  color: #ffffff;
+  box-shadow: 0 18px 34px rgb(0 0 0 / 16%);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.game-card::after {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+  transition: border-color 180ms ease;
+}
+
+.game-card > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.game-card-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgb(0 0 0 / 8%) 20%, rgb(5 7 4 / 92%) 100%);
+}
+
+.game-card-top {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  left: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.game-card-number {
+  display: grid;
+  width: 34px;
+  height: 28px;
+  place-items: center;
+  border-radius: 3px;
+  background: var(--lime);
+  color: #171a14;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.game-card:nth-child(3n + 2) .game-card-number {
+  background: var(--coral);
+}
+
+.game-card:nth-child(3n) .game-card-number {
+  background: var(--blue);
+  color: #ffffff;
+}
+
+.game-card-top > svg {
+  width: 36px;
+  height: 36px;
+  padding: 9px;
+  border: 1px solid rgb(255 255 255 / 38%);
+  border-radius: 4px;
+  background: rgb(7 9 6 / 68%);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.game-card-copy {
+  position: absolute;
+  right: 18px;
+  bottom: 17px;
+  left: 18px;
+  z-index: 2;
+  display: block;
+}
+
+.game-card-copy small {
+  display: block;
+  margin-bottom: 7px;
+  color: #d9ded2;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.game-card-copy strong {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1.06;
+}
+
+.game-card:hover,
+.game-card:focus-visible {
+  border-color: var(--lime);
+  box-shadow: 0 22px 44px rgb(0 0 0 / 34%);
+}
+
+.game-card:hover::after,
+.game-card:focus-visible::after {
+  border-color: var(--lime);
+}
+
+.game-card:hover > img,
+.game-card:focus-visible > img {
+  transform: scale(1.045);
+}
+
+.game-card:hover .game-card-top > svg,
+.game-card:focus-visible .game-card-top > svg {
+  background: var(--lime);
+  color: #171a14;
+  transform: translate(2px, -2px);
+}
+
 .site-footer {
   background: var(--dark);
   color: var(--dark-text);
@@ -1503,6 +1659,10 @@ html.flashbang-active {
 
   .project-mark span {
     font-size: 3.4rem;
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1720,7 +1880,8 @@ html.flashbang-active {
   .work-section,
   .about-section,
   .activity-section,
-  .contact-section {
+  .contact-section,
+  .games-section {
     padding: 82px 0;
   }
 
@@ -1826,6 +1987,14 @@ html.flashbang-active {
     grid-column: 3;
   }
 
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-card {
+    aspect-ratio: 16 / 9;
+  }
+
   .footer-inner {
     min-height: 82px;
   }
@@ -1883,6 +2052,10 @@ html.flashbang-active {
   .activity-heading h2,
   .contact-inner h2 {
     font-size: 2.15rem;
+  }
+
+  .game-card-copy strong {
+    font-size: 1.32rem;
   }
 }
 

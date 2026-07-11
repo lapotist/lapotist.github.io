@@ -628,6 +628,10 @@ document.querySelectorAll(".project-card").forEach((element, index) => {
   element.style.setProperty("--reveal-delay", `${Math.min(index * 70, 210)}ms`);
 });
 
+document.querySelectorAll(".game-card").forEach((element, index) => {
+  element.style.setProperty("--reveal-delay", `${(index % 3) * 65}ms`);
+});
+
 revealElements.forEach((element) => {
   element.classList.add("reveal-pending");
 });
