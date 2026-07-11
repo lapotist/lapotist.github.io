@@ -132,6 +132,18 @@ svg {
   background: var(--bg);
 }
 
+.site-header::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: var(--blue);
+  content: "";
+  transform: scaleX(var(--scroll-progress, 0));
+  transform-origin: left;
+}
+
 .site-nav {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -206,8 +218,8 @@ svg {
 .icon-button {
   position: relative;
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   place-items: center;
   border: 1px solid var(--line);
@@ -223,16 +235,43 @@ svg {
   transform: translateY(-2px);
 }
 
+.theme-icon {
+  position: absolute;
+  transition: opacity 180ms ease, transform 240ms ease;
+}
+
 .theme-icon-sun {
-  display: none;
+  opacity: 0;
+  transform: rotate(-70deg) scale(0.65);
+}
+
+.theme-icon-moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
 }
 
 :root[data-theme="dark"] .theme-icon-sun {
-  display: block;
+  opacity: 1;
+  transform: rotate(0) scale(1);
 }
 
 :root[data-theme="dark"] .theme-icon-moon {
-  display: none;
+  opacity: 0;
+  transform: rotate(70deg) scale(0.65);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
 }
 
 [data-tooltip]::after {
@@ -305,20 +344,88 @@ svg {
   right: 0;
   width: 50%;
   height: 72%;
+  border: 1px solid rgb(23 26 20 / 22%);
   background: var(--coral);
 }
 
-.hero-avatar {
+.hero-portrait {
+  --portrait-x: 0px;
+  --portrait-y: 0px;
+  --portrait-rx: 0deg;
+  --portrait-ry: 0deg;
   position: absolute;
   top: 12%;
   right: 2%;
   bottom: auto;
   width: min(42vw, 70svh, 560px);
+  isolation: isolate;
+  box-shadow: 14px 14px 0 var(--blue), var(--shadow);
+  transform: perspective(900px) translate3d(var(--portrait-x), var(--portrait-y), 0)
+    rotateX(var(--portrait-rx)) rotateY(var(--portrait-ry)) rotate(2deg);
+  transform-style: preserve-3d;
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease;
+}
+
+.hero-avatar {
+  position: relative;
+  z-index: 0;
+  width: 100%;
   height: auto;
   border: 1px solid rgb(23 26 20 / 28%);
-  box-shadow: var(--shadow);
-  transform: rotate(2deg);
-  transition: transform 300ms ease;
+  background: var(--surface);
+}
+
+.portrait-label {
+  position: absolute;
+  top: -12px;
+  left: 18px;
+  z-index: 4;
+  padding: 6px 9px;
+  background: var(--lime);
+  color: #171a14;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.hero-portrait::before,
+.hero-portrait::after,
+.portrait-brackets::before,
+.portrait-brackets::after {
+  position: absolute;
+  z-index: 3;
+  width: 20px;
+  height: 20px;
+  content: "";
+  pointer-events: none;
+}
+
+.hero-portrait::before {
+  top: -8px;
+  left: -8px;
+  border-top: 2px solid var(--ink);
+  border-left: 2px solid var(--ink);
+}
+
+.hero-portrait::after {
+  right: -8px;
+  bottom: -8px;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+
+.portrait-brackets::before {
+  top: -8px;
+  right: -8px;
+  border-top: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+}
+
+.portrait-brackets::after {
+  bottom: -8px;
+  left: -8px;
+  border-bottom: 2px solid var(--ink);
+  border-left: 2px solid var(--ink);
 }
 
 .hero-index {
@@ -353,12 +460,19 @@ svg {
 }
 
 .hero h1 {
+  width: fit-content;
   max-width: 790px;
   margin: 0;
   font-size: 8rem;
   font-weight: 900;
   line-height: 0.86;
+  text-shadow: 4px 4px 0 var(--blue);
   text-transform: uppercase;
+  transition: text-shadow 180ms ease;
+}
+
+.hero h1:hover {
+  text-shadow: 7px 4px 0 var(--coral), -3px -2px 0 var(--blue);
 }
 
 .hero-statement {
@@ -437,6 +551,17 @@ svg {
   border: 1px solid var(--ink);
   border-radius: 50%;
   background: var(--lime);
+}
+
+.hero-status[data-loading="true"] .status-light {
+  animation: status-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes status-pulse {
+  to {
+    border-color: var(--lime);
+    transform: scale(1.35);
+  }
 }
 
 .signal-strip {
@@ -538,13 +663,42 @@ svg {
   border-radius: 6px;
   background: var(--dark-soft);
   flex-direction: column;
-  transition: border-color 180ms ease, transform 180ms ease, background-color 180ms ease;
+  translate: 0 0;
+  transition: border-color 180ms ease, background-color 180ms ease, translate 180ms ease;
 }
 
-.project-card:hover {
+.project-card::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 3px;
+  background: var(--lime);
+  content: "";
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.project-card:nth-child(2)::before {
+  background: var(--coral);
+}
+
+.project-card:nth-child(3)::before {
+  background: var(--blue);
+}
+
+.project-card:hover,
+.project-card:focus-within {
   border-color: var(--lime);
   background: #292e23;
-  transform: translateY(-4px);
+  translate: 0 -4px;
+}
+
+.project-card:hover::before,
+.project-card:focus-within::before {
+  transform: scaleY(1);
 }
 
 .project-featured {
@@ -651,6 +805,18 @@ svg {
   color: var(--lime);
 }
 
+.project-links svg,
+.project-primary-link svg {
+  transition: transform 160ms ease;
+}
+
+.project-links a:hover svg,
+.project-links a:focus-visible svg,
+.project-primary-link:hover svg,
+.project-primary-link:focus-visible svg {
+  transform: translate(3px, -3px);
+}
+
 .project-mark {
   display: flex;
   min-width: 0;
@@ -660,6 +826,13 @@ svg {
   color: #171a14;
   flex-direction: column;
   justify-content: space-between;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.project-card:hover .project-mark,
+.project-card:focus-within .project-mark {
+  box-shadow: 8px 8px 0 var(--blue);
+  transform: translate(-4px, -4px);
 }
 
 .project-mark span {
@@ -734,6 +907,14 @@ svg {
   background: var(--dark);
   box-shadow: 18px 18px 0 var(--coral);
   color: var(--dark-text);
+  translate: 0 0;
+  transition: box-shadow 200ms ease, translate 200ms ease;
+}
+
+.terminal:hover,
+.terminal:focus-within {
+  box-shadow: 18px 18px 0 var(--blue);
+  translate: 0 -4px;
 }
 
 .terminal-header {
@@ -752,6 +933,32 @@ svg {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.terminal-header span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.terminal-header span:last-child::before {
+  color: var(--lime);
+  content: "LIVE";
+  font-weight: 800;
+}
+
+.terminal-header span:last-child::after {
+  width: 7px;
+  height: 11px;
+  background: var(--lime);
+  content: "";
+  animation: terminal-cursor 1s steps(1) infinite;
+}
+
+@keyframes terminal-cursor {
+  50% {
+    opacity: 0;
+  }
 }
 
 .terminal-output {
@@ -812,13 +1019,25 @@ svg {
 }
 
 .activity-list {
+  position: relative;
   margin: 0;
   padding: 0;
   border-top: 1px solid rgb(23 26 20 / 45%);
   list-style: none;
 }
 
+.activity-list::before {
+  position: absolute;
+  top: 53px;
+  bottom: 53px;
+  left: 18px;
+  width: 1px;
+  background: rgb(23 26 20 / 45%);
+  content: "";
+}
+
 .activity-list li {
+  position: relative;
   display: grid;
   min-height: 106px;
   padding: 18px 0;
@@ -826,6 +1045,18 @@ svg {
   align-items: center;
   gap: 16px;
   border-bottom: 1px solid rgb(23 26 20 / 45%);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.activity-list li > * {
+  position: relative;
+  z-index: 1;
+}
+
+.activity-list li:hover,
+.activity-list li:focus-within {
+  background: #171a14;
+  color: #ffffff;
 }
 
 .activity-icon {
@@ -835,6 +1066,15 @@ svg {
   place-items: center;
   border: 1px solid #171a14;
   border-radius: 4px;
+  background: var(--coral);
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.activity-list li:first-child .activity-icon,
+.activity-list li:hover .activity-icon,
+.activity-list li:focus-within .activity-icon {
+  background: var(--lime);
+  color: #171a14;
 }
 
 .activity-list strong,
@@ -844,6 +1084,21 @@ svg {
 
 .activity-list strong {
   font-size: 0.93rem;
+}
+
+.activity-list li:first-child strong::after {
+  display: inline-flex;
+  min-height: 19px;
+  margin-left: 9px;
+  padding: 0 6px;
+  align-items: center;
+  background: var(--lime);
+  color: #171a14;
+  content: "HEAD";
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.58rem;
+  font-weight: 900;
+  vertical-align: middle;
 }
 
 .activity-list a {
@@ -866,6 +1121,12 @@ svg {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.68rem;
   white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.activity-list li:hover time,
+.activity-list li:focus-within time {
+  color: #ffffff;
 }
 
 .contact-section {
@@ -881,23 +1142,38 @@ svg {
 .contact-links {
   margin-top: 58px;
   border-top: 1px solid var(--line);
+  counter-reset: contact-link;
 }
 
 .contact-links > a {
+  counter-increment: contact-link;
   display: grid;
   min-height: 94px;
-  padding: 16px 4px;
-  grid-template-columns: minmax(180px, 0.5fr) minmax(0, 1fr) auto;
+  padding: 16px 12px;
+  grid-template-columns: 48px minmax(180px, 0.5fr) minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
   border-bottom: 1px solid var(--line);
-  transition: padding 160ms ease, background-color 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 
-.contact-links > a:hover {
-  padding-right: 18px;
-  padding-left: 18px;
-  background: var(--surface-soft);
+.contact-links > a::before {
+  color: var(--blue-text);
+  content: "0" counter(contact-link);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.contact-links > a:hover,
+.contact-links > a:focus-visible {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.contact-links > a:hover::before,
+.contact-links > a:focus-visible::before {
+  color: var(--lime);
 }
 
 .contact-links span {
@@ -906,6 +1182,7 @@ svg {
   gap: 10px;
   font-size: 1.1rem;
   font-weight: 850;
+  transition: transform 160ms ease;
 }
 
 .contact-links small {
@@ -913,6 +1190,26 @@ svg {
   color: var(--muted);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.76rem;
+  transition: color 160ms ease;
+}
+
+.contact-links > a > svg {
+  transition: transform 160ms ease;
+}
+
+.contact-links > a:hover span,
+.contact-links > a:focus-visible span {
+  transform: translateX(4px);
+}
+
+.contact-links > a:hover small,
+.contact-links > a:focus-visible small {
+  color: var(--bg);
+}
+
+.contact-links > a:hover > svg,
+.contact-links > a:focus-visible > svg {
+  transform: translate(3px, -3px);
 }
 
 .site-footer {
@@ -958,9 +1255,10 @@ svg {
 }
 
 .reveal.reveal-pending {
-  opacity: 1;
-  transform: translateY(18px);
+  opacity: 0;
+  transform: translateY(24px);
   transition: opacity 500ms ease, transform 500ms ease;
+  transition-delay: var(--reveal-delay, 0ms);
 }
 
 .reveal.reveal-pending.is-visible {
@@ -968,20 +1266,12 @@ svg {
   transform: translateY(0);
 }
 
-.hero .reveal:nth-of-type(2) {
-  transition-delay: 60ms;
-}
-
-.hero .reveal:nth-of-type(3) {
-  transition-delay: 120ms;
-}
-
 @media (max-width: 1024px) {
   .hero h1 {
-    font-size: 6.2rem;
+    font-size: 5.6rem;
   }
 
-  .hero-avatar {
+  .hero-portrait {
     right: 2%;
     width: min(40vw, 66svh, 480px);
   }
@@ -1008,6 +1298,13 @@ svg {
 
   .project-mark span {
     font-size: 3.4rem;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1100px) {
+  .hero-statement,
+  .hero-copy {
+    max-width: 48%;
   }
 }
 
@@ -1058,7 +1355,7 @@ svg {
     height: 310px;
   }
 
-  .hero-avatar {
+  .hero-portrait {
     top: auto;
     right: 18px;
     bottom: 18px;
@@ -1154,6 +1451,7 @@ svg {
   .hero h1 {
     font-size: 4rem;
     line-height: 0.92;
+    text-shadow: 3px 3px 0 var(--blue);
   }
 
   .hero-statement {
@@ -1181,7 +1479,7 @@ svg {
     margin-top: 20px;
   }
 
-  .hero-avatar {
+  .hero-portrait {
     right: 14px;
     bottom: 14px;
     width: min(64vw, 250px);
@@ -1299,17 +1597,28 @@ svg {
   }
 
   .contact-links > a {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
     gap: 5px 16px;
+  }
+
+  .contact-links > a::before {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+  }
+
+  .contact-links span {
+    grid-row: 1;
+    grid-column: 2;
   }
 
   .contact-links small {
     grid-row: 2;
+    grid-column: 2;
   }
 
   .contact-links > a > svg {
     grid-row: 1 / span 2;
-    grid-column: 2;
+    grid-column: 3;
   }
 
   .footer-inner {
@@ -1322,7 +1631,7 @@ svg {
     padding-bottom: clamp(160px, calc(100svh - 540px), 250px);
   }
 
-  .hero-avatar {
+  .hero-portrait {
     width: min(60vw, clamp(140px, calc(100svh - 555px), 230px));
   }
 
@@ -1332,6 +1641,7 @@ svg {
 
   .hero h1 {
     font-size: 3.3rem;
+    text-shadow: 2px 2px 0 var(--blue);
   }
 
   .hero-statement {
@@ -1355,6 +1665,96 @@ svg {
   }
 }
 
+@media (max-width: 390px) and (max-height: 650px) {
+  .hero-content {
+    padding-top: 28px;
+    padding-bottom: 130px;
+  }
+
+  .eyebrow {
+    margin-bottom: 10px;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+  }
+
+  .hero-statement {
+    margin-top: 12px;
+    font-size: 1.05rem;
+  }
+
+  .hero-copy,
+  .hero-status {
+    display: none;
+  }
+
+  .hero-actions {
+    margin-top: 14px;
+  }
+
+  .hero-portrait {
+    bottom: 12px;
+    width: min(44vw, 140px);
+  }
+
+  .hero-color-block {
+    height: 170px;
+  }
+}
+
+@media (min-width: 391px) and (max-height: 520px) {
+  .hero,
+  .hero-content {
+    min-height: calc(100svh - 108px);
+  }
+
+  .hero-content {
+    padding-top: 26px;
+    padding-bottom: 26px;
+    justify-content: flex-start;
+  }
+
+  .eyebrow {
+    margin-bottom: 10px;
+  }
+
+  .hero h1 {
+    font-size: 3.5rem;
+    line-height: 0.92;
+  }
+
+  .hero-statement {
+    margin-top: 12px;
+    font-size: 1.1rem;
+  }
+
+  .hero-copy,
+  .hero-status {
+    display: none;
+  }
+
+  .hero-actions {
+    margin-top: 16px;
+  }
+
+  .hero-color-block {
+    top: 8%;
+    right: 0;
+    bottom: auto;
+    width: 45%;
+    height: 84%;
+  }
+
+  .hero-portrait {
+    top: 8%;
+    right: 2%;
+    bottom: auto;
+    width: min(26vw, 56svh, 220px);
+    max-width: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1369,8 +1769,11 @@ svg {
     animation-iteration-count: 1 !important;
   }
 
-  .reveal {
+  .reveal,
+  .reveal.reveal-pending,
+  .reveal.reveal-pending.is-visible {
     opacity: 1;
     transform: none;
+    transition: none;
   }
 }

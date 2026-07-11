@@ -3,6 +3,7 @@ const GITHUB_API = `https://api.github.com/users/${GITHUB_USER}`;
 
 const themeToggle = document.querySelector("#theme-toggle");
 const themeColor = document.querySelector('meta[name="theme-color"]');
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function getPreferredTheme() {
   const savedTheme = localStorage.getItem("lapotist-theme");
@@ -23,10 +24,40 @@ function applyTheme(theme) {
 
 applyTheme(getPreferredTheme());
 
-themeToggle?.addEventListener("click", () => {
+function commitTheme(theme) {
+  localStorage.setItem("lapotist-theme", theme);
+  applyTheme(theme);
+}
+
+themeToggle?.addEventListener("click", async () => {
   const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  localStorage.setItem("lapotist-theme", nextTheme);
-  applyTheme(nextTheme);
+
+  if (!document.startViewTransition || reducedMotion.matches) {
+    commitTheme(nextTheme);
+    return;
+  }
+
+  const bounds = themeToggle.getBoundingClientRect();
+  const x = bounds.left + bounds.width / 2;
+  const y = bounds.top + bounds.height / 2;
+  const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+  const transition = document.startViewTransition(() => commitTheme(nextTheme));
+
+  try {
+    await transition.ready;
+    document.documentElement.animate(
+      {
+        clipPath: [`circle(0 at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+      },
+      {
+        duration: 420,
+        easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        pseudoElement: "::view-transition-new(root)",
+      },
+    );
+  } catch (error) {
+    // The theme has already changed; unsupported transition details can safely fall back.
+  }
 });
 
 document.querySelectorAll("[data-current-year]").forEach((element) => {
@@ -202,8 +233,15 @@ function renderActivity(events) {
 
 async function loadGitHubData() {
   const status = document.querySelector("#data-status");
+  const statusWrap = status?.closest(".hero-status");
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 8000);
+
+  statusWrap?.setAttribute("data-loading", "true");
+
+  if (status) {
+    status.textContent = "Syncing public GitHub data";
+  }
 
   try {
     const [profile, repositories, events] = await Promise.all([
@@ -224,69 +262,142 @@ async function loadGitHubData() {
       status.textContent = "Showing verified public profile data";
     }
   } finally {
+    statusWrap?.removeAttribute("data-loading");
     window.clearTimeout(timeout);
   }
 }
 
-const revealObserver = new IntersectionObserver(
-  (entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
-        observer.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.14 },
-);
+const revealElements = [...document.querySelectorAll(".reveal")];
+const heroReveals = [...document.querySelectorAll(".hero .reveal")];
 
-document.querySelectorAll(".reveal").forEach((element) => {
-  element.classList.add("reveal-pending");
-  revealObserver.observe(element);
+heroReveals.forEach((element, index) => {
+  element.style.setProperty("--reveal-delay", `${index * 55}ms`);
 });
+
+document.querySelectorAll(".project-card").forEach((element, index) => {
+  element.style.setProperty("--reveal-delay", `${Math.min(index * 70, 210)}ms`);
+});
+
+revealElements.forEach((element) => {
+  element.classList.add("reveal-pending");
+});
+
+if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+  revealElements.forEach((element) => element.classList.add("is-visible"));
+} else {
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.14 },
+  );
+
+  revealElements
+    .filter((element) => !element.closest(".hero"))
+    .forEach((element) => revealObserver.observe(element));
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      heroReveals.forEach((element) => element.classList.add("is-visible"));
+    });
+  });
+}
 
 const sections = document.querySelectorAll("main section[id]");
 const navLinks = document.querySelectorAll(".nav-links a");
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    const visibleEntry = entries
-      .filter((entry) => entry.isIntersecting)
-      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      const visibleEntry = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-    if (!visibleEntry) {
+      if (!visibleEntry) {
+        return;
+      }
+
+      navLinks.forEach((link) => {
+        const isCurrent = link.getAttribute("href") === `#${visibleEntry.target.id}`;
+
+        if (isCurrent) {
+          link.setAttribute("aria-current", "location");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+    },
+    { rootMargin: "-20% 0px -65%", threshold: [0, 0.15, 0.5] },
+  );
+
+  sections.forEach((section) => sectionObserver.observe(section));
+}
+
+const hero = document.querySelector(".hero");
+const heroPortrait = document.querySelector(".hero-portrait");
+
+if (hero && heroPortrait && window.matchMedia("(pointer: fine)").matches && !reducedMotion.matches) {
+  let bounds;
+  let pointerFrame;
+  let pointerPosition;
+
+  hero.addEventListener("pointerenter", () => {
+    bounds = hero.getBoundingClientRect();
+  });
+
+  hero.addEventListener("pointermove", (event) => {
+    bounds ??= hero.getBoundingClientRect();
+    pointerPosition = { x: event.clientX, y: event.clientY };
+
+    if (pointerFrame) {
       return;
     }
 
-    navLinks.forEach((link) => {
-      const isCurrent = link.getAttribute("href") === `#${visibleEntry.target.id}`;
-
-      if (isCurrent) {
-        link.setAttribute("aria-current", "location");
-      } else {
-        link.removeAttribute("aria-current");
-      }
+    pointerFrame = window.requestAnimationFrame(() => {
+      const x = Math.max(-0.5, Math.min(0.5, (pointerPosition.x - bounds.left) / bounds.width - 0.5));
+      const y = Math.max(-0.5, Math.min(0.5, (pointerPosition.y - bounds.top) / bounds.height - 0.5));
+      heroPortrait.style.setProperty("--portrait-x", `${x * 12}px`);
+      heroPortrait.style.setProperty("--portrait-y", `${y * 10}px`);
+      heroPortrait.style.setProperty("--portrait-rx", `${y * -3}deg`);
+      heroPortrait.style.setProperty("--portrait-ry", `${x * 3}deg`);
+      pointerFrame = null;
     });
-  },
-  { rootMargin: "-20% 0px -65%", threshold: [0, 0.15, 0.5] },
-);
-
-sections.forEach((section) => sectionObserver.observe(section));
-
-const hero = document.querySelector(".hero");
-const heroAvatar = document.querySelector(".hero-avatar");
-
-if (hero && heroAvatar && window.matchMedia("(pointer: fine)").matches) {
-  hero.addEventListener("pointermove", (event) => {
-    const bounds = hero.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    heroAvatar.style.transform = `translate(${x * 8}px, ${y * 8}px) rotate(2deg)`;
   });
 
   hero.addEventListener("pointerleave", () => {
-    heroAvatar.style.transform = "rotate(2deg)";
+    if (pointerFrame) {
+      window.cancelAnimationFrame(pointerFrame);
+      pointerFrame = null;
+    }
+
+    ["--portrait-x", "--portrait-y", "--portrait-rx", "--portrait-ry"].forEach((property) => {
+      heroPortrait.style.removeProperty(property);
+    });
   });
 }
+
+let progressFrame;
+
+function updateScrollProgress() {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+  document.documentElement.style.setProperty("--scroll-progress", String(progress));
+  progressFrame = null;
+}
+
+function requestScrollProgress() {
+  if (!progressFrame) {
+    progressFrame = window.requestAnimationFrame(updateScrollProgress);
+  }
+}
+
+window.addEventListener("scroll", requestScrollProgress, { passive: true });
+window.addEventListener("resize", requestScrollProgress);
+updateScrollProgress();
 
 window.addEventListener("DOMContentLoaded", () => {
   window.lucide?.createIcons();
