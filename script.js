@@ -471,6 +471,31 @@ function updateProfile(profile) {
   }
 }
 
+function updateContributionStats(stats) {
+  const prCount = document.querySelector("#pr-count");
+  const issueCount = document.querySelector("#issue-count");
+
+  if (prCount && Number.isFinite(stats.pullRequests)) {
+    prCount.textContent = String(stats.pullRequests);
+  }
+
+  if (issueCount && Number.isFinite(stats.issues)) {
+    issueCount.textContent = String(stats.issues);
+  }
+}
+
+async function fetchContributionStats(signal) {
+  const [pullRequests, issues] = await Promise.all([
+    fetchGitHub(`/search/issues?q=author:${GITHUB_USER}+type:pr&per_page=1`, signal),
+    fetchGitHub(`/search/issues?q=author:${GITHUB_USER}+type:issue&per_page=1`, signal),
+  ]);
+
+  return {
+    pullRequests: pullRequests?.total_count ?? 0,
+    issues: issues?.total_count ?? 0,
+  };
+}
+
 function updateRepositories(repositories) {
   const languageCount = document.querySelector("#language-count");
   const languages = new Set(repositories.map((repository) => repository.language).filter(Boolean));
@@ -594,13 +619,15 @@ async function loadGitHubData() {
   }
 
   try {
-    const [profile, repositories, events] = await Promise.all([
+    const [profile, repositories, events, contributionStats] = await Promise.all([
       fetchGitHub("", controller.signal),
       fetchGitHub("/repos?per_page=100&sort=updated", controller.signal),
       fetchGitHub("/events/public?per_page=30", controller.signal),
+      fetchContributionStats(controller.signal),
     ]);
 
     updateProfile(profile);
+    updateContributionStats(contributionStats);
     updateRepositories(repositories);
     renderActivity(events);
 
