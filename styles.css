@@ -777,7 +777,7 @@ html.flashbang-active {
 .signal-grid {
   display: grid;
   min-height: 116px;
-  grid-template-columns: repeat(3, 1fr) auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
   align-items: stretch;
 }
 
@@ -1733,7 +1733,7 @@ html.flashbang-active {
   }
 
   .signal-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .signal-link {
@@ -1741,11 +1741,23 @@ html.flashbang-active {
   }
 
   .signal-item {
-    padding-right: 18px;
+    padding: 18px 14px;
+    border-bottom: 1px solid rgb(23 26 20 / 28%);
+    border-right: 1px solid rgb(23 26 20 / 28%);
   }
 
   .signal-item + .signal-item {
-    padding-left: 18px;
+    padding-left: 14px;
+  }
+
+  .signal-item:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .signal-item:last-of-type {
+    grid-column: 1 / -1;
+    border-right: 0;
+    text-align: center;
   }
 
   .section-heading,
@@ -1805,7 +1817,7 @@ html.flashbang-active {
   .hero-content {
     min-height: calc(100svh - 88px);
     padding-top: 42px;
-    padding-bottom: 260px;
+    padding-bottom: 160px;
   }
 
   .eyebrow {
@@ -1845,15 +1857,11 @@ html.flashbang-active {
   }
 
   .hero-portrait {
-    right: 14px;
-    bottom: 14px;
-    width: min(64vw, 250px);
-    max-width: calc(100% - 28px);
-    transform: rotate(2deg);
+    display: none;
   }
 
   .hero-color-block {
-    height: 270px;
+    height: 170px;
   }
 
   .signal-grid {
