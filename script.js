@@ -1,5 +1,5 @@
 const GITHUB_USER = "lapotist";
-const GITHUB_API = `https://api.github.com/users/${GITHUB_USER}`;
+const GITHUB_API = "https://api.github.com";
 
 const themeToggle = document.querySelector("#theme-toggle");
 const soundToggle = document.querySelector("#sound-toggle");
@@ -620,9 +620,9 @@ async function loadGitHubData() {
 
   try {
     const [profile, repositories, events, contributionStats] = await Promise.all([
-      fetchGitHub("", controller.signal),
-      fetchGitHub("/repos?per_page=100&sort=updated", controller.signal),
-      fetchGitHub("/events/public?per_page=30", controller.signal),
+      fetchGitHub(`/users/${GITHUB_USER}`, controller.signal),
+      fetchGitHub(`/users/${GITHUB_USER}/repos?per_page=100&sort=updated`, controller.signal),
+      fetchGitHub(`/users/${GITHUB_USER}/events/public?per_page=30`, controller.signal),
       fetchContributionStats(controller.signal),
     ]);
 
