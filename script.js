@@ -485,8 +485,10 @@ function updateContributionStats(stats) {
 }
 
 async function fetchContributionStats(signal) {
+  // Only merged pull requests on public repositories count toward the PR
+  // total — open, closed-unmerged, and private-repo PRs are excluded.
   const [pullRequests, issues] = await Promise.all([
-    fetchGitHub(`/search/issues?q=author:${GITHUB_USER}+type:pr&per_page=1`, signal),
+    fetchGitHub(`/search/issues?q=author:${GITHUB_USER}+type:pr+is:merged+is:public&per_page=1`, signal),
     fetchGitHub(`/search/issues?q=author:${GITHUB_USER}+type:issue&per_page=1`, signal),
   ]);
 
